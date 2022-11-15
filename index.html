@@ -9,9 +9,10 @@
         <title>Game Of Life</title>
 </head>
 
-<body>
+<body onload="init()">
         <canvas id="frame" width="0" height="0" />
         <script src="index.js"></script>
+        <input type="text" onkeypress="return myKeyPress(event)" />
 </body>
 
 </html>

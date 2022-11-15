@@ -10,29 +10,72 @@ class Cell {
         }
 }
 
-const canvas = document.getElementById("frame");
-const context = canvas.getContext('2d');
+var currentKey;
+var canvas;
+var context;
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+const numCellsX = 200;
+var cellDimensions;
+var numCellsY;
 
-var numCellsX = 1000;
-var cellDimensions = canvas.width / (numCellsX + 1);
-var numCellsY = Math.floor(canvas.height / cellDimensions);
+var cells;
 
-var cells = new Array(numCellsX);
+const tickRate = 7; // updates / second
+var gameRunning = false;
 
-var tickRate = 7; // updates / second
 
-for (let i = 0; i < numCellsX; i++) {
-        cells[i] = new Array(numCellsY);
+function initListeners() {
+        document.addEventListener("keydown", (event) => {
+
+                if (event.isComposing) {
+                        return;
+                }
+
+                switch (event.key) {
+                        case 's':
+                                gameRunning = true;
+                                gameLoop();
+                                break;
+                        case 'e':
+                                gameRunning = false;
+                                break;
+                }
+
+        });
 }
 
-for (let x = 0; x < numCellsX; x++) {
-        for (let y = 0; y < numCellsY; y++) {
-                cells[x][y] = new Cell(Status.DEAD);
+function init() {
+        canvas = document.getElementById("frame");
+        context = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        cellDimensions = canvas.width / (numCellsX + 1);
+        numCellsY = Math.floor(canvas.height / cellDimensions);
+
+        cells = new Array(numCellsX);
+
+        gameRunning = false;
+
+        for (let i = 0; i < numCellsX; i++) {
+                cells[i] = new Array(numCellsY);
         }
+
+        for (let x = 0; x < numCellsX; x++) {
+                for (let y = 0; y < numCellsY; y++) {
+                        cells[x][y] = new Cell(Status.DEAD);
+                }
+        }
+
+        cells[20][20].status == Status.ALIVE;
+        cells[21][20].status == Status.ALIVE;
+        cells[20][21].status == Status.ALIVE;
+        cells[21][21].status == Status.ALIVE;
+
+        initListeners();
 }
+
 
 function checkNeighbours(x, y) {
         let numAlive = 0;
@@ -59,8 +102,9 @@ function checkNeighbours(x, y) {
 function updateCell(x, y) {
         let n = checkNeighbours(x, y); // number of alive neighbours
 
-        if (cells[x][y] == Status.ALIVE) {
+        if (cells[x][y].status == Status.ALIVE) {
                 cells[x][y].newStatus = (n != 2 && n != 3) ? Status.DEAD : Status.ALIVE;
+                console.log(`${x} ${y}`);
         } else {
                 cells[x][y].newStatus = (n == 3) ? Status.ALIVE : Status.DEAD;
         }
@@ -72,6 +116,12 @@ function updateCells() {
                         updateCell(x, y);
                 }
         }
+
+        for (let x = 0; x < numCellsX; x++) {
+                for (let y = 0; y < numCellsY; y++) {
+                        cells[x][y].status = cells[x][y].newStatus;
+                }
+        }
 }
 
 function clear() {
@@ -79,7 +129,7 @@ function clear() {
         context.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-function draw() {
+function updateCanvas() {
         clear();
         updateCells();
 
@@ -93,11 +143,9 @@ function draw() {
         }
 }
 
-
 function gameLoop() {
-        draw();
-        setTimeout(gameLoop, 1000 / tickRate);
+        if (gameRunning) {
+                updateCanvas();
+                setTimeout(gameLoop, 1000 / tickRate);
+        }
 }
-
-
-gameLoop();
