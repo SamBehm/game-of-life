@@ -113,7 +113,6 @@ function gameLoop() {
 }
 
 function draw(cellX, cellY) {
-        console.log(`${cellX}, ${cellY}`);
         context.fillStyle = "white";
         context.fillRect((cellX * cellDimensions) + (cellX * cellGap),
                 (cellY * cellDimensions) + (cellY * cellGap),
