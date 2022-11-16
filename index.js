@@ -25,8 +25,15 @@ var cells;              /* 2d array of cells */
 var currentKey;
 var mouseDown = false;
 
-const tickRate = 4;     /* updates / second */
+var tickRate = 4;       /* updates / second */
 var gameRunning = false;
+
+title = ["111111  111   1 1  11111     111  11111   1     11111 11111 11111",
+        "1    1 1   1 1 1 1 1        1   1 1       1       1   1     1",
+        "1      1   1 1 1 1 1        1   1 1111    1       1   1111  1",
+        "1  111 11111 1   1 111      1   1 1       1       1   1     111",
+        "1    1 1   1 1   1 1        1   1 1       1       1   1     1",
+        "111111 1   1 1   1 11111     111  1       11111 11111 1     11111"];
 
 function getCellPosition(screenX, screenY) {
         let x = Math.floor((screenX - cellGap) / (cellDimensions + cellGap));
@@ -113,6 +120,8 @@ function gameLoop() {
 }
 
 function draw(cellX, cellY) {
+        if (cellX >= numCellsX || cellY >= numCellsY) return;
+
         context.fillStyle = "white";
         context.fillRect((cellX * cellDimensions) + (cellX * cellGap),
                 (cellY * cellDimensions) + (cellY * cellGap),
@@ -175,6 +184,87 @@ function initListeners() {
         });
 }
 
+function initGame() {
+        clear();
+        initListeners();
+}
+
+/**
+ * Waits for a number of milliseconds.
+ * 
+ * Credit to Dan Dascalescu for his answer in StackOverflow!
+ * (from post https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep)
+ * @param {*} ms 
+ * @returns Promise
+ */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+async function initSplashScreen() {
+
+        let titleCoords = [];
+        let filledTitleCoords = [];
+        let lineNum = 0;
+
+        let length = 0;
+        for (const line of title) {
+                if (line.length > length) length = line.length;
+        }
+
+        length = Math.floor(length / 2);
+
+        for (const line of title) {
+                for (let i = 0; i < line.length; i++) {
+                        if (line[i] == '1') {
+                                titleCoords.push(
+                                        [i + Math.floor(numCellsX / 2) - length,
+                                        lineNum + Math.floor(numCellsY / 2) - Math.floor(title.length / 2)]
+                                );
+                        }
+
+                }
+                lineNum++;
+        }
+
+        let y = 0;
+        while (y < numCellsY * 3) { // this can be improved with some geometry
+                clear();
+                let dY = y;
+                let x = 0;
+
+                for (const coord of filledTitleCoords) {
+                        console.log(`(${coord[0]}, ${coord[1]})`)
+                        draw(coord[0], coord[1]);
+                }
+
+                while (dY >= 0) {
+                        let index = titleCoords.findIndex(coord => coord[0] == x && coord[1] == dY);
+                        if (index != -1) {
+                                cells[x][dY].status = Status.ALIVE;
+                                filledTitleCoords.push(titleCoords[index]);
+                        }
+                        draw(x, dY);
+                        dY--;
+                        x++;
+                }
+                y++;
+
+                await sleep(10);
+        }
+
+        await sleep(1000);
+
+        let temp = tickRate;
+        tickRate = 30;
+        gameRunning = true;
+        gameLoop();
+
+        await sleep(3000);
+
+        gameRunning = false;
+        clear();
+        tickRate = temp;
+}
+
 function init() {
         canvas = document.getElementById("frame");
         context = canvas.getContext('2d');
@@ -200,8 +290,5 @@ function init() {
                 }
         }
 
-        clear();
-
-
-        initListeners();
+        initSplashScreen();
 }
