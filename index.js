@@ -261,11 +261,18 @@ async function initSplashScreen() {
         await sleep(3000);
 
         gameRunning = false;
-        clear();
         tickRate = temp;
+
+        for (let x = 0; x < numCellsX; x++) {
+                for (let y = 0; y < numCellsY; y++) {
+                        cells[x][y].status = Status.DEAD;
+                }
+        }
+
+        return;
 }
 
-function init() {
+async function init() {
         canvas = document.getElementById("frame");
         context = canvas.getContext('2d');
 
@@ -290,5 +297,6 @@ function init() {
                 }
         }
 
-        initSplashScreen();
+        await initSplashScreen();
+        initGame();
 }
