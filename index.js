@@ -309,3 +309,29 @@ async function init() {
         await initSplashScreen();
         initGame();
 }
+
+function windowResize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let remaindingWidth = canvas.width - ((numCellsX + 1) * cellGap);
+        cellDimensions = remaindingWidth / numCellsX;
+
+        numCellsY = Math.floor((canvas.height - cellGap) / (cellDimensions + cellGap));
+
+        for (let i = 0; i < numCellsX; i++) {
+                while (cells[i].length > numCellsY) cells[i].pop();
+                while (cells[i].length < numCellsY) cells[i].push(new Cell(Status.DEAD));
+        }
+
+        clear();
+        for (let x = 0; x < numCellsX; x++) {
+                for (let y = 0; y < numCellsY; y++) {
+                        if (cells[x][y].status == Status.ALIVE) {
+                                draw(x, y);
+                        }
+                }
+        }
+}
+
+window.onresize = windowResize;
