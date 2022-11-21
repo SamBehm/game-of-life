@@ -69,6 +69,14 @@ function checkNeighbours(x, y) {
         return numAlive;
 }
 
+function resetCells() {
+        for (let x = 0; x < numCellsX; x++) {
+                for (let y = 0; y < numCellsY; y++) {
+                        cells[x][y].status = Status.DEAD;
+                }
+        }
+}
+
 function updateCell(x, y) {
         let n = checkNeighbours(x, y); // number of alive neighbours
 
@@ -144,6 +152,11 @@ function initListeners() {
                         case 'e':
                                 gameRunning = false;
                                 break;
+                        case 'c':
+                                resetCells();
+                                clear();
+                                break;
+
                 }
 
         });
@@ -155,6 +168,7 @@ function initListeners() {
                         let mouseX = event.clientX - canvas.offsetLeft;
                         let mouseY = event.clientY - canvas.offsetTop;
                         let cellPosition = getCellPosition(mouseX, mouseY);
+                        cells[cellPosition[0]][cellPosition[1]].status = Status.ALIVE;
                         draw(cellPosition[0], cellPosition[1]);
                 }
 
@@ -232,7 +246,6 @@ async function initSplashScreen() {
                 let x = 0;
 
                 for (const coord of filledTitleCoords) {
-                        console.log(`(${coord[0]}, ${coord[1]})`)
                         draw(coord[0], coord[1]);
                 }
 
@@ -263,11 +276,7 @@ async function initSplashScreen() {
         gameRunning = false;
         tickRate = temp;
 
-        for (let x = 0; x < numCellsX; x++) {
-                for (let y = 0; y < numCellsY; y++) {
-                        cells[x][y].status = Status.DEAD;
-                }
-        }
+        resetCells();
 
         return;
 }
